@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETRO TOONS — Caricaturas Clásicas en Español</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan:    #00f5ff;
+  --magenta: #ff00aa;
+  --yellow:  #ffe600;
+  --orange:  #ff6b00;
+  --green:   #00ff88;
+  --bg:      #06050e;
+  --card:    #0d0b1e;
+  --border:  #1c1836;
+  --dim:     #6a5f94;
+  --text:    #e2d9ff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  background:var(--bg);
+  font-family:'Exo 2',sans-serif;
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Grid + scanlines */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,245,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,245,255,.04) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);
+}
+
+/* ── HEADER ── */
+header{
+  position:relative;z-index:10;
+  padding:40px 20px 28px;
+  text-align:center;
+  border-bottom:1px solid rgba(0,245,255,.12);
+  background:linear-gradient(180deg,rgba(0,245,255,.06) 0%,transparent 100%);
+}
+.logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.8rem,5.5vw,3.5rem);
+  font-weight:900;
+  letter-spacing:.14em;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 22px rgba(0,245,255,.35));
+}
+.sub{
+  margin-top:5px;
+  font-size:.75rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--cyan);opacity:.6;
+}
+
+/* ── LAYOUT ── */
+.app{
+  position:relative;z-index:10;
+  display:grid;
+  grid-template-columns:300px 1fr;
+  min-height:calc(100vh - 130px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  max-height:calc(100vh - 130px);
+  position:sticky;top:0;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(0,245,255,.15);border-radius:2px;}
+
+.search-wrap{
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;
+  background:var(--bg);
+  z-index:2;
+}
+.search-wrap input{
+  width:100%;
+  background:rgba(0,245,255,.04);
+  border:1px solid rgba(0,245,255,.2);
+  border-radius:4px;
+  padding:8px 12px 8px 34px;
+  color:var(--text);
+  font-family:'Exo 2',sans-serif;
+  font-size:.82rem;
+  outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.search-wrap input:focus{
+  border-color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,245,255,.18);
+}
+.search-icon{
+  position:absolute;left:22px;top:50%;transform:translateY(-50%);
+  font-size:.85rem;color:var(--cyan);opacity:.5;
+}
+
+.series-label{
+  padding:10px 14px 6px;
+  font-family:'Orbitron',sans-serif;
+  font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--magenta);opacity:.7;
+}
+
+.series-item{
+  padding:10px 14px;
+  cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .18s;
+  display:flex;align-items:center;gap:10px;
+}
+.series-item:hover{background:rgba(0,245,255,.04);border-left-color:rgba(0,245,255,.3);}
+.series-item.active{
+  background:rgba(0,245,255,.07);
+  border-left-color:var(--cyan);
+}
+.series-emoji{font-size:1.3rem;flex-shrink:0;}
+.series-info{}
+.series-name{font-size:.78rem;font-weight:600;color:#fff;line-height:1.3;}
+.series-year{font-size:.65rem;color:var(--dim);margin-top:1px;}
+
+/* ── MAIN PANEL ── */
+.main{
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* player area */
+.player-zone{
+  background:#000;
+  position:relative;
+}
+.player-zone iframe{
+  width:100%;
+  aspect-ratio:16/9;
+  border:none;
+  display:block;
+}
+.player-placeholder{
+  aspect-ratio:16/9;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:12px;
+  background:radial-gradient(ellipse at center,#0d0b1e 0%,#060510 100%);
+}
+.player-placeholder .big-emoji{font-size:4rem;}
+.player-placeholder p{
+  font-family:'Orbitron',sans-serif;
+  font-size:.7rem;letter-spacing:.2em;color:var(--dim);
+  text-transform:uppercase;
+}
+
+/* series header */
+.series-header{
+  padding:14px 20px 10px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:12px;
+}
+.series-header .emoji{font-size:2rem;}
+.series-header-info{}
+.series-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:.95rem;font-weight:700;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.series-meta{
+  font-size:.72rem;color:var(--dim);margin-top:3px;
+}
+.series-desc{
+  font-size:.75rem;line-height:1.6;color:var(--text);opacity:.75;
+  margin-top:6px;max-width:680px;
+}
+
+/* episode list */
+.episodes-section{
+  flex:1;overflow-y:auto;padding:14px 20px;
+}
+.episodes-section::-webkit-scrollbar{width:4px;}
+.episodes-section::-webkit-scrollbar-thumb{background:rgba(0,245,255,.12);border-radius:2px;}
+
+.ep-label{
+  font-family:'Orbitron',sans-serif;
+  font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--orange);opacity:.8;margin-bottom:10px;
+}
+
+.episodes-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:8px;
+}
+
+.ep-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:10px 12px;
+  cursor:pointer;
+  transition:all .18s;
+  position:relative;
+}
+.ep-card:hover{border-color:rgba(0,245,255,.35);background:rgba(0,245,255,.04);}
+.ep-card.playing{
+  border-color:var(--cyan);
+  background:rgba(0,245,255,.07);
+  box-shadow:0 0 14px rgba(0,245,255,.12);
+}
+.ep-card.playing::before{
+  content:'▶';
+  position:absolute;top:6px;right:8px;
+  font-size:.6rem;color:var(--cyan);
+}
+.ep-num{
+  font-family:'Orbitron',sans-serif;
+  font-size:.58rem;color:var(--dim);letter-spacing:.1em;
+  margin-bottom:4px;
+}
+.ep-name{
+  font-size:.73rem;font-weight:600;color:var(--text);
+  line-height:1.35;
+}
+.ep-audio{
+  margin-top:5px;
+  font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--green);opacity:.7;
+}
+
+.no-episodes{
+  text-align:center;padding:40px 20px;
+  color:var(--dim);font-size:.8rem;letter-spacing:.1em;
+}
+
+/* loading spinner */
+.loading{
+  display:none;
+  position:absolute;inset:0;
+  background:rgba(6,5,14,.85);
+  align-items:center;justify-content:center;
+  z-index:5;
+}
+.loading.show{display:flex;}
+.spinner{
+  width:36px;height:36px;
+  border:2px solid rgba(0,245,255,.15);
+  border-top-color:var(--cyan);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── MOBILE ── */
+@media(max-width:680px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{
+    max-height:220px;
+    position:static;
+    border-right:none;
+    border-bottom:1px solid var(--border);
+  }
+  .series-item{padding:8px 12px;}
+}
+
+/* ── EMPTY STATE ── */
+.empty{
+  padding:20px;text-align:center;color:var(--dim);
+  font-size:.75rem;letter-spacing:.1em;
+}
+
+footer{
+  position:relative;z-index:10;
+  padding:14px 20px;
+  border-top:1px solid var(--border);
+  font-size:.65rem;color:var(--dim);
+  letter-spacing:.1em;text-align:center;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📺 RETRO TOONS</div>
+  <p class="sub">Caricaturas Clásicas · Audio Español Latino · 80s &amp; 90s</p>
+</header>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="search-wrap" style="position:relative">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="Buscar serie...">
+    </div>
+    <div id="series-list"></div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <div class="player-zone" id="player-zone">
+      <div class="player-placeholder" id="placeholder">
+        <span class="big-emoji">📺</span>
+        <p>Selecciona una serie para comenzar</p>
+      </div>
+      <div class="loading" id="loading"><div class="spinner"></div></div>
+    </div>
+    <div id="series-header"></div>
+    <div class="episodes-section" id="episodes-section">
+      <div class="empty">← Elige una serie del menú</div>
+    </div>
+  </main>
+
+</div>
+
+<footer>RETRO TOONS · Contenido vía Internet Archive · Solo para uso personal nostálgico 🕹️</footer>
+
+<script>
+// ─── CATÁLOGO ───────────────────────────────────────────────────
+// identifier: ID en archive.org
+// filePattern: cómo se llaman los archivos (con {N} = número episodio, {TITLE} = título)
+// episodes: lista [{n, title}] — se genera el embed URL automáticamente
+const CATALOG = [
+  {
+    id: 'thundercats',
+    title: 'ThunderCats',
+    years: '1985–1988',
+    emoji: '⚡🐱',
+    audio: 'Español Latino + Inglés',
+    desc: 'Los felinos cósmicos huyen de Thundera y llegan a la Tercera Tierra. Lion-O y la Espada del Augurio enfrentan al eterno Mumm-Ra.',
+    identifier: 'thundercats-1985-latinoingles-1080p',
+    episodes: [
+      {n:'001', title:'Éxodo (1)', file:'Thundercats 001 - Éxodo (1).mp4'},
+      {n:'002', title:'Éxodo (2)', file:'Thundercats 002 - Éxodo (2).mp4'},
+      {n:'003', title:'Los Niños de Thundera', file:'Thundercats 003 - Los Niños de Thundera.mp4'},
+      {n:'004', title:'La Torre de Triunfos', file:'Thundercats 004 - La Torre de Triunfos.mp4'},
+      {n:'005', title:'Hombre de Armas', file:'Thundercats 005 - Hombre de Armas.mp4'},
+      {n:'006', title:'El Medallón de Mer-Lin', file:'Thundercats 006 - El Medallón de Mer-Lin.mp4'},
+      {n:'007', title:'El Ojo de Thundera', file:'Thundercats 007 - El Ojo de Thundera.mp4'},
+      {n:'008', title:'La Espada de Omens', file:'Thundercats 008 - La Espada de Omens.mp4'},
+      {n:'009', title:'El Jardín de las Delicias', file:'Thundercats 009 - El Jardín de las Delicias.mp4'},
+      {n:'010', title:'La Tierra de los Gigantes', file:'Thundercats 010 - La Tierra de los Gigantes.mp4'},
+    ]
+  },
+  {
+    id: 'heman',
+    title: 'He-Man y los Amos del Universo',
+    years: '1983–1985',
+    emoji: '⚔️💪',
+    audio: 'Español Latino',
+    desc: 'El Príncipe Adam de Eternia se transforma en He-Man, el hombre más poderoso del universo, para defender Grayskull de Skeletor.',
+    identifier: 'He-Man-T1-BerserkLatam',
+    episodes: [
+      {n:'001', title:'El rayo desaparecedor de diamante', file:'He-Man 001 El rayo desaparecedor de diamante.mp4'},
+      {n:'002', title:'El fantasma del castillo', file:'He-Man 002 El fantasma del castillo.mp4'},
+      {n:'003', title:'Evilseed', file:'He-Man 003 Evilseed.mp4'},
+      {n:'004', title:'Teela la guerrera', file:'He-Man 004 Teela la guerrera.mp4'},
+      {n:'005', title:'La trampa de Skeletor', file:'He-Man 005 La trampa de Skeletor.mp4'},
+      {n:'006', title:'El hechizo del dragón', file:'He-Man 006 El hechizo del dragón.mp4'},
+      {n:'007', title:'El misterio de Eternia', file:'He-Man 007 El misterio de Eternia.mp4'},
+      {n:'008', title:'El ladrón de poderes', file:'He-Man 008 El ladrón de poderes.mp4'},
+      {n:'009', title:'El pozo de la eternidad', file:'He-Man 009 El pozo de la eternidad.mp4'},
+      {n:'010', title:'El juego del destino', file:'He-Man 010 El juego del destino.mp4'},
+    ]
+  },
+  {
+    id: 'halcones',
+    title: 'Halcones Galácticos',
+    years: '1986–1987',
+    emoji: '🦅🚀',
+    audio: 'Español Latino',
+    desc: 'Guerreros mitad metal, mitad carne protegen la galaxia Limbo contra Mon*Star. ¡Parcialmente de acero, parcialmente de fuego!',
+    identifier: 'los-halcones-galacticos-audio-latino',
+    episodes: [
+      {n:'01', title:'La historia original', file:'Silverhawks - S01E01.mp4'},
+      {n:'02', title:'El loco de los meses', file:'Silverhawks - S01E02.mp4'},
+      {n:'03', title:'Macho y la lanza', file:'Silverhawks - S01E03.mp4'},
+      {n:'04', title:'El nacimiento del mal', file:'Silverhawks - S01E04.mp4'},
+      {n:'05', title:'La piedra musical', file:'Silverhawks - S01E05.mp4'},
+      {n:'06', title:'El castillo de los sueños', file:'Silverhawks - S01E06.mp4'},
+      {n:'07', title:'La nave fantasma', file:'Silverhawks - S01E07.mp4'},
+      {n:'08', title:'El planeta de los robots', file:'Silverhawks - S01E08.mp4'},
+      {n:'09', title:'El secuestro', file:'Silverhawks - S01E09.mp4'},
+      {n:'10', title:'La mina de cristal', file:'Silverhawks - S01E10.mp4'},
+      {n:'11', title:'El juego del azar', file:'Silverhawks - S01E11.mp4'},
+      {n:'12', title:'El guardián de la galaxia', file:'Silverhawks - S01E12.mp4'},
+      {n:'13', title:'La última batalla', file:'Silverhawks - S01E13.mp4'},
+    ]
+  },
+];
+
+// ─── ESTADO ─────────────────────────────────────────────────────
+let currentSeries = null;
+let currentEp     = null;
+let searchTerm    = '';
+
+// ─── RENDER SIDEBAR ─────────────────────────────────────────────
+function renderSidebar() {
+  const list = document.getElementById('series-list');
+  const filtered = CATALOG.filter(s =>
+    !searchTerm || s.title.toLowerCase().includes(searchTerm)
+  );
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">Sin resultados</div>';
+    return;
+  }
+
+  // agrupar por año para labels
+  list.innerHTML = filtered.map(s => `
+    <div class="series-item ${currentSeries?.id === s.id ? 'active' : ''}"
+         onclick="selectSeries('${s.id}')">
+      <span class="series-emoji">${s.emoji}</span>
+      <div class="series-info">
+        <div class="series-name">${s.title}</div>
+        <div class="series-year">${s.years} · ${s.episodes.length} eps</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── SELECCIONAR SERIE ──────────────────────────────────────────
+function selectSeries(id) {
+  currentSeries = CATALOG.find(s => s.id === id);
+  currentEp     = null;
+
+  renderSidebar();
+  renderHeader();
+  renderEpisodes();
+  showPlaceholder();
+}
+
+// ─── HEADER DE SERIE ────────────────────────────────────────────
+function renderHeader() {
+  const el = document.getElementById('series-header');
+  if (!currentSeries) { el.innerHTML = ''; return; }
+  const s = currentSeries;
+  el.innerHTML = `
+    <div class="series-header">
+      <span class="emoji">${s.emoji}</span>
+      <div class="series-header-info">
+        <div class="series-title">${s.title}</div>
+        <div class="series-meta">${s.years} · 🔊 ${s.audio} · ${s.episodes.length} episodios</div>
+        <div class="series-desc">${s.desc}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── LISTA DE EPISODIOS ─────────────────────────────────────────
+function renderEpisodes() {
+  const sec = document.getElementById('episodes-section');
+  if (!currentSeries) {
+    sec.innerHTML = '<div class="empty">← Elige una serie del menú</div>';
+    return;
+  }
+  const eps = currentSeries.episodes;
+  sec.innerHTML = `
+    <div class="ep-label">▸ Episodios disponibles</div>
+    <div class="episodes-grid">
+      ${eps.map(ep => `
+        <div class="ep-card ${currentEp?.n === ep.n ? 'playing' : ''}"
+             onclick="playEpisode('${ep.n}')">
+          <div class="ep-num">EP ${ep.n}</div>
+          <div class="ep-name">${ep.title}</div>
+          <div class="ep-audio">🔊 ${currentSeries.audio.split(' ')[0]} Latino</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ─── REPRODUCIR EPISODIO ────────────────────────────────────────
+function playEpisode(epN) {
+  const ep = currentSeries.episodes.find(e => e.n === epN);
+  if (!ep) return;
+  currentEp = ep;
+
+  const zone   = document.getElementById('player-zone');
+  const loading = document.getElementById('loading');
+
+  // Quitar placeholder
+  const ph = document.getElementById('placeholder');
+  if (ph) ph.remove();
+
+  // Quitar iframe anterior
+  const old = zone.querySelector('iframe');
+  if (old) old.remove();
+
+  loading.classList.add('show');
+
+  // Construir URL del embed de Archive.org
+  // Formato: https://archive.org/embed/{identifier}?start={file}
+  const encodedFile = encodeURIComponent(ep.file);
+  const src = `https://archive.org/embed/${currentSeries.identifier}/${encodedFile}`;
+
+  const iframe = document.createElement('iframe');
+  iframe.src          = src;
+  iframe.allowFullscreen = true;
+  iframe.allow        = 'autoplay; fullscreen';
+  iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-presentation');
+
+  iframe.onload = () => loading.classList.remove('show');
+  iframe.onerror = () => {
+    loading.classList.remove('show');
+    showError(ep);
+  };
+
+  zone.insertBefore(iframe, loading);
+  renderEpisodes(); // actualizar estado "playing"
+}
+
+// ─── ERROR FALLBACK ─────────────────────────────────────────────
+function showError(ep) {
+  const zone = document.getElementById('player-zone');
+  const old  = zone.querySelector('iframe');
+  if (old) old.remove();
+
+  const fallbackUrl = `https://archive.org/details/${currentSeries.identifier}`;
+  zone.insertAdjacentHTML('afterbegin', `
+    <div class="player-placeholder" style="aspect-ratio:16/9">
+      <span style="font-size:2.5rem">⚠️</span>
+      <p style="color:#ff6060;font-size:.7rem">No se pudo cargar el episodio</p>
+      <a href="${fallbackUrl}" target="_blank"
+         style="margin-top:8px;padding:7px 16px;border:1px solid rgba(255,96,96,.4);
+                border-radius:3px;color:#ff9090;font-size:.72rem;text-decoration:none;
+                transition:background .2s;"
+         onmouseover="this.style.background='rgba(255,0,0,.1)'"
+         onmouseout="this.style.background='transparent'">
+        Ver en Archive.org ↗
+      </a>
+    </div>
+  `);
+}
+
+// ─── PLACEHOLDER ────────────────────────────────────────────────
+function showPlaceholder() {
+  const zone = document.getElementById('player-zone');
+  const old  = zone.querySelector('iframe');
+  const oldph= zone.querySelector('.player-placeholder');
+  if (old)   old.remove();
+  if (oldph) oldph.remove();
+  zone.insertAdjacentHTML('afterbegin', `
+    <div class="player-placeholder" id="placeholder">
+      <span class="big-emoji">${currentSeries ? currentSeries.emoji : '📺'}</span>
+      <p>${currentSeries ? 'Selecciona un episodio' : 'Selecciona una serie'}</p>
+    </div>
+  `);
+}
+
+// ─── BÚSQUEDA ────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  renderSidebar();
+});
+
+// ─── INIT ────────────────────────────────────────────────────────
+renderSidebar();
+</script>
+</body>
+</html>
