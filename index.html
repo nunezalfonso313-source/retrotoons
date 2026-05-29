@@ -22,6 +22,7 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .search-wrap input{width:100%;background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.2);border-radius:4px;padding:8px 12px 8px 34px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.82rem;outline:none;transition:border-color .2s,box-shadow .2s;}
 .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,.18);}
 .search-icon{position:absolute;left:22px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--cyan);opacity:.5;}
+.series-count{padding:8px 14px;font-family:'Orbitron',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--magenta);opacity:.7;}
 .series-item{padding:10px 14px;cursor:pointer;border-left:2px solid transparent;transition:all .18s;display:flex;align-items:center;gap:10px;}
 .series-item:hover{background:rgba(0,245,255,.04);border-left-color:rgba(0,245,255,.3);}
 .series-item.active{background:rgba(0,245,255,.07);border-left-color:var(--cyan);}
@@ -71,6 +72,7 @@ footer{position:relative;z-index:10;padding:14px 20px;border-top:1px solid var(-
       <span class="search-icon">🔍</span>
       <input type="text" id="search" placeholder="Buscar serie...">
     </div>
+    <div class="series-count" id="series-count"></div>
     <div id="series-list"></div>
   </aside>
   <main class="main">
@@ -88,70 +90,17 @@ footer{position:relative;z-index:10;padding:14px 20px;border-top:1px solid var(-
   </main>
 </div>
 <footer>RETRO TOONS · Contenido vía Internet Archive · Solo para uso personal nostálgico 🕹️</footer>
+
+<!-- CATÁLOGO: edita catalogo.js para agregar series -->
+<script src="catalogo.js"></script>
 <script>
-function halconesEps(){
-  const titulos={'01':'La Historia Original','02':'Viaje a Limbo','03':'Al Devorador de Planetas','04':'Para Salvar al Sol','05':'Que no se Detenga el Tiempo','06':'Una Ave Rapaz','07':'El Cuarto Secreto','08':'Una Amenaza de Guerra','09':'Sky-Shadow','10':'Una Atracción Magnética','11':'Escudo de Oro','12':'Zero el Ladrón de la Memoria','13':'El Traslado','14':'Trampa para Artillero Pt.1','15':'Trampa para Artillero Pt.2','16':'Carrera Contra el Tiempo','17':'Operación Congelador','18':'La Nave Fantasma','19':'La Gran Carrera Galáctica','20':'La Pantalla Fantasma'};
-  const eps=[];
-  for(let i=1;i<=65;i++){
-    const n=String(i).padStart(2,'0');
-    eps.push({n, title:titulos[n]||`Episodio ${n}`});
-  }
-  return eps;
-}
-
-// Formato embed Archive.org con start= para ir directo al archivo
-// https://archive.org/embed/IDENTIFIER?start=FILENAME
-const CATALOG=[
-  {
-    id:'thundercats',title:'ThunderCats',years:'1985–1988',emoji:'⚡🐱',
-    audio:'Español Latino + Inglés',
-    desc:'Los felinos cósmicos huyen de Thundera y llegan a la Tercera Tierra. Lion-O y la Espada del Augurio enfrentan al eterno Mumm-Ra.',
-    identifier:'thundercats-1985-latinoingles-1080p',
-    episodes:[
-      {n:'001',title:'Éxodo (1)'},
-      {n:'002',title:'La alianza profana'},
-      {n:'003',title:'La ayuda de los Berbils'},
-      {n:'004',title:'Los esclavos del castillo Plun-Darr'},
-      {n:'005',title:'Pumm-Ra'},
-      {n:'006',title:'El terror de Brazo de Hierro'},
-      {n:'007',title:'Cuestión de tiempo'},
-      {n:'008',title:'El torreón de las trampas'},
-      {n:'009',title:'El jardín de las delicias'},
-      {n:'010',title:'Mandora - La combatiente del mal'},
-    ]
-  },
-  {
-    id:'heman',title:'He-Man y los Amos del Universo',years:'1983–1985',emoji:'⚔️💪',
-    audio:'Español Latino',
-    desc:'El Príncipe Adam de Eternia se transforma en He-Man, el hombre más poderoso del universo, para defender Grayskull de Skeletor.',
-    identifier:'He-Man-T1-BerserkLatam',
-    episodes:[
-      {n:'001',title:'El rayo desaparecedor de diamante'},
-      {n:'002',title:'El fantasma del castillo'},
-      {n:'003',title:'Evilseed'},
-      {n:'004',title:'Teela la guerrera'},
-      {n:'005',title:'La trampa de Skeletor'},
-      {n:'006',title:'El hechizo del dragón'},
-      {n:'007',title:'El misterio de Eternia'},
-      {n:'008',title:'El ladrón de poderes'},
-      {n:'009',title:'El pozo de la eternidad'},
-      {n:'010',title:'El juego del destino'},
-    ]
-  },
-  {
-    id:'halcones',title:'Halcones Galácticos',years:'1986–1987',emoji:'🦅🚀',
-    audio:'Español Latino',
-    desc:'Guerreros mitad metal, mitad carne protegen la galaxia Limbo contra Mon*Star. ¡65 episodios completos en latino!',
-    identifier:'los-halcones-galacticos-audio-latino',
-    episodes:halconesEps()
-  },
-];
-
 let currentSeries=null, currentEp=null, searchTerm='';
 
 function renderSidebar(){
   const list=document.getElementById('series-list');
+  const count=document.getElementById('series-count');
   const filtered=CATALOG.filter(s=>!searchTerm||s.title.toLowerCase().includes(searchTerm));
+  count.textContent=`▸ ${filtered.length} series`;
   if(!filtered.length){list.innerHTML='<div class="empty">Sin resultados</div>';return;}
   list.innerHTML=filtered.map(s=>`
     <div class="series-item ${currentSeries?.id===s.id?'active':''}" onclick="selectSeries('${s.id}')">
@@ -206,20 +155,14 @@ function playEpisode(epN){
   const ep=currentSeries.episodes.find(e=>e.n===epN);
   if(!ep) return;
   currentEp=ep;
-
   const zone=document.getElementById('player-zone');
   const loading=document.getElementById('loading');
   const ph=document.getElementById('placeholder');
   if(ph) ph.remove();
   const old=zone.querySelector('iframe');
   if(old) old.remove();
-
   loading.classList.add('show');
-
-  // URL embed de Archive.org — formato playlist, sin especificar archivo individual
-  // Esto evita problemas con caracteres especiales en nombres de archivo
   const src=`https://archive.org/embed/${currentSeries.identifier}?playlist=1&list_id=${currentSeries.identifier}`;
-
   const iframe=document.createElement('iframe');
   iframe.src=src;
   iframe.allowFullscreen=true;
@@ -228,8 +171,6 @@ function playEpisode(epN){
   iframe.onload=()=>loading.classList.remove('show');
   zone.insertBefore(iframe,loading);
   renderEpisodes();
-
-  // Scroll al player
   zone.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
