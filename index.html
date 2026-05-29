@@ -18,7 +18,7 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .sidebar{border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 130px);position:sticky;top:0;}
 .sidebar::-webkit-scrollbar{width:4px;}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(0,245,255,.15);border-radius:2px;}
-.search-wrap{padding:14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;position:relative;}
+.search-wrap{padding:14px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:2;position:relative;}
 .search-wrap input{width:100%;background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.2);border-radius:4px;padding:8px 12px 8px 34px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.82rem;outline:none;transition:border-color .2s,box-shadow .2s;}
 .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,.18);}
 .search-icon{position:absolute;left:22px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--cyan);opacity:.5;}
@@ -29,6 +29,8 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .series-emoji{font-size:1.3rem;flex-shrink:0;}
 .series-name{font-size:.78rem;font-weight:600;color:#fff;line-height:1.3;}
 .series-year{font-size:.65rem;color:var(--dim);margin-top:1px;}
+.badge-yt{display:inline-block;font-size:.5rem;padding:1px 5px;border-radius:2px;background:rgba(255,0,0,.2);border:1px solid rgba(255,80,80,.3);color:#ff8080;margin-left:4px;vertical-align:middle;}
+.badge-ar{display:inline-block;font-size:.5rem;padding:1px 5px;border-radius:2px;background:rgba(0,245,255,.1);border:1px solid rgba(0,245,255,.25);color:var(--cyan);margin-left:4px;vertical-align:middle;}
 .main{display:flex;flex-direction:column;}
 .player-zone{background:#000;position:relative;}
 .player-zone iframe{width:100%;aspect-ratio:16/9;border:none;display:block;}
@@ -44,6 +46,7 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .episodes-section::-webkit-scrollbar{width:4px;}
 .episodes-section::-webkit-scrollbar-thumb{background:rgba(0,245,255,.12);border-radius:2px;}
 .ep-label{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);opacity:.8;margin-bottom:10px;}
+.yt-note{font-size:.7rem;color:var(--dim);margin-bottom:10px;padding:8px 10px;border:1px solid rgba(255,80,80,.2);border-radius:4px;background:rgba(255,0,0,.05);}
 .episodes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
 .ep-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:10px 12px;cursor:pointer;transition:all .18s;position:relative;}
 .ep-card:hover{border-color:rgba(0,245,255,.35);background:rgba(0,245,255,.04);}
@@ -89,12 +92,16 @@ footer{position:relative;z-index:10;padding:14px 20px;border-top:1px solid var(-
     </div>
   </main>
 </div>
-<footer>RETRO TOONS · Contenido vía Internet Archive · Solo para uso personal nostálgico 🕹️</footer>
+<footer>RETRO TOONS · Archive.org + YouTube · Solo para uso personal nostálgico 🕹️</footer>
 
-<!-- CATÁLOGO: edita catalogo.js para agregar series -->
 <script src="catalogo.js"></script>
 <script>
 let currentSeries=null, currentEp=null, searchTerm='';
+
+function badgeHtml(type){
+  if(type==='archive'||type==='archive') return '<span class="badge-ar">Archive</span>';
+  return '<span class="badge-yt">YouTube</span>';
+}
 
 function renderSidebar(){
   const list=document.getElementById('series-list');
@@ -106,7 +113,7 @@ function renderSidebar(){
     <div class="series-item ${currentSeries?.id===s.id?'active':''}" onclick="selectSeries('${s.id}')">
       <span class="series-emoji">${s.emoji}</span>
       <div>
-        <div class="series-name">${s.title}</div>
+        <div class="series-name">${s.title}${badgeHtml(s.type)}</div>
         <div class="series-year">${s.years} · ${s.episodes.length} eps</div>
       </div>
     </div>`).join('');
@@ -139,8 +146,11 @@ function renderHeader(){
 function renderEpisodes(){
   const sec=document.getElementById('episodes-section');
   if(!currentSeries){sec.innerHTML='<div class="empty">← Elige una serie del menú</div>';return;}
+  const isYT=currentSeries.type==='ytplaylist'||currentSeries.type==='youtube';
+  const ytNote=isYT?`<div class="yt-note">▶ Fuente YouTube — el player cargará la playlist completa. Navega los episodios dentro del player.</div>`:'';
   sec.innerHTML=`
     <div class="ep-label">▸ Episodios · ${currentSeries.episodes.length} total</div>
+    ${ytNote}
     <div class="episodes-grid">
       ${currentSeries.episodes.map(ep=>`
         <div class="ep-card ${currentEp?.n===ep.n?'playing':''}" onclick="playEpisode('${ep.n}')">
@@ -149,6 +159,21 @@ function renderEpisodes(){
           <div class="ep-audio">🔊 Latino</div>
         </div>`).join('')}
     </div>`;
+}
+
+function buildEmbedUrl(s, ep){
+  if(s.type==='archive'){
+    return `https://archive.org/embed/${s.identifier}?playlist=1&list_id=${s.identifier}`;
+  }
+  if(s.type==='ytplaylist'){
+    // Embed playlist de YouTube, el índice corresponde al número de episodio
+    const idx=parseInt(ep.n,10)-1;
+    return `https://www.youtube.com/embed/videoseries?list=${s.playlistId}&index=${idx}&autoplay=1`;
+  }
+  if(s.type==='youtube'){
+    return `https://www.youtube.com/embed/${s.videoId}?autoplay=1`;
+  }
+  return '';
 }
 
 function playEpisode(epN){
@@ -162,12 +187,14 @@ function playEpisode(epN){
   const old=zone.querySelector('iframe');
   if(old) old.remove();
   loading.classList.add('show');
-  const src=`https://archive.org/embed/${currentSeries.identifier}?playlist=1&list_id=${currentSeries.identifier}`;
+  const src=buildEmbedUrl(currentSeries, ep);
   const iframe=document.createElement('iframe');
   iframe.src=src;
   iframe.allowFullscreen=true;
-  iframe.allow='autoplay; fullscreen';
-  iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-autoplay');
+  iframe.allow='autoplay; fullscreen; encrypted-media; picture-in-picture';
+  if(currentSeries.type==='archive'){
+    iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-autoplay');
+  }
   iframe.onload=()=>loading.classList.remove('show');
   zone.insertBefore(iframe,loading);
   renderEpisodes();
