@@ -14,11 +14,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;border-bottom:1px solid rgba(0,245,255,.12);background:linear-gradient(180deg,rgba(0,245,255,.06) 0%,transparent 100%);}
 .logo{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,5.5vw,3.5rem);font-weight:900;letter-spacing:.14em;background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 22px rgba(0,245,255,.35));}
 .sub{margin-top:5px;font-size:.75rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);opacity:.6;}
-.app{position:relative;z-index:10;display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 130px);}
+.app{position:relative;z-index:10;display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 130px);}
 .sidebar{border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 130px);position:sticky;top:0;}
 .sidebar::-webkit-scrollbar{width:4px;}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(0,245,255,.15);border-radius:2px;}
-.search-wrap{padding:14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;}
+.search-wrap{padding:14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:2;position:relative;}
 .search-wrap input{width:100%;background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.2);border-radius:4px;padding:8px 12px 8px 34px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.82rem;outline:none;transition:border-color .2s,box-shadow .2s;}
 .search-wrap input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,.18);}
 .search-icon{position:absolute;left:22px;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--cyan);opacity:.5;}
@@ -28,7 +28,7 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .series-emoji{font-size:1.3rem;flex-shrink:0;}
 .series-name{font-size:.78rem;font-weight:600;color:#fff;line-height:1.3;}
 .series-year{font-size:.65rem;color:var(--dim);margin-top:1px;}
-.main{display:flex;flex-direction:column;overflow:hidden;}
+.main{display:flex;flex-direction:column;}
 .player-zone{background:#000;position:relative;}
 .player-zone iframe{width:100%;aspect-ratio:16/9;border:none;display:block;}
 .player-placeholder{aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at center,#0d0b1e 0%,#060510 100%);}
@@ -39,11 +39,11 @@ header{position:relative;z-index:10;padding:40px 20px 28px;text-align:center;bor
 .series-title{font-family:'Orbitron',sans-serif;font-size:.95rem;font-weight:700;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .series-meta{font-size:.72rem;color:var(--dim);margin-top:3px;}
 .series-desc{font-size:.75rem;line-height:1.6;color:var(--text);opacity:.75;margin-top:6px;max-width:680px;}
-.episodes-section{flex:1;overflow-y:auto;padding:14px 20px;}
+.episodes-section{flex:1;overflow-y:auto;padding:14px 20px;max-height:260px;}
 .episodes-section::-webkit-scrollbar{width:4px;}
 .episodes-section::-webkit-scrollbar-thumb{background:rgba(0,245,255,.12);border-radius:2px;}
 .ep-label{font-family:'Orbitron',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);opacity:.8;margin-bottom:10px;}
-.episodes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;}
+.episodes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
 .ep-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:10px 12px;cursor:pointer;transition:all .18s;position:relative;}
 .ep-card:hover{border-color:rgba(0,245,255,.35);background:rgba(0,245,255,.04);}
 .ep-card.playing{border-color:var(--cyan);background:rgba(0,245,255,.07);box-shadow:0 0 14px rgba(0,245,255,.12);}
@@ -67,13 +67,13 @@ footer{position:relative;z-index:10;padding:14px 20px;border-top:1px solid var(-
 </header>
 <div class="app">
   <aside class="sidebar">
-    <div class="search-wrap" style="position:relative">
+    <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="search" placeholder="Buscar serie...">
     </div>
     <div id="series-list"></div>
   </aside>
-  <main class="main" id="main">
+  <main class="main">
     <div class="player-zone" id="player-zone">
       <div class="player-placeholder" id="placeholder">
         <span class="big-emoji">📺</span>
@@ -89,68 +89,61 @@ footer{position:relative;z-index:10;padding:14px 20px;border-top:1px solid var(-
 </div>
 <footer>RETRO TOONS · Contenido vía Internet Archive · Solo para uso personal nostálgico 🕹️</footer>
 <script>
-// Genera episodios de Halcones S01E01..S01E65
-function halconesEps() {
-  const titulos = {
-    '01':'La Historia Original','02':'Viaje a Limbo','03':'Al Devorador de Planetas',
-    '04':'Para Salvar al Sol','05':'Que no se Detenga el Tiempo','06':'Una Ave Rapaz',
-    '07':'El Cuarto Secreto','08':'Una Amenaza de Guerra','09':'Sky-Shadow',
-    '10':'Una Atracción Magnética','11':'Escudo de Oro','12':'Zero el Ladrón de la Memoria',
-    '13':'El Traslado','14':'Trampa para Artillero Pt.1','15':'Trampa para Artillero Pt.2',
-    '16':'Carrera Contra el Tiempo','17':'Operación Congelador','18':'La Nave Fantasma',
-    '19':'La Gran Carrera Galáctica','20':'La Pantalla Fantasma',
-  };
-  const eps = [];
+function halconesEps(){
+  const titulos={'01':'La Historia Original','02':'Viaje a Limbo','03':'Al Devorador de Planetas','04':'Para Salvar al Sol','05':'Que no se Detenga el Tiempo','06':'Una Ave Rapaz','07':'El Cuarto Secreto','08':'Una Amenaza de Guerra','09':'Sky-Shadow','10':'Una Atracción Magnética','11':'Escudo de Oro','12':'Zero el Ladrón de la Memoria','13':'El Traslado','14':'Trampa para Artillero Pt.1','15':'Trampa para Artillero Pt.2','16':'Carrera Contra el Tiempo','17':'Operación Congelador','18':'La Nave Fantasma','19':'La Gran Carrera Galáctica','20':'La Pantalla Fantasma'};
+  const eps=[];
   for(let i=1;i<=65;i++){
-    const n = String(i).padStart(2,'0');
-    eps.push({n, title: titulos[n] || `Episodio ${n}`, file:`Silverhawks - S01E${n}.mp4`});
+    const n=String(i).padStart(2,'0');
+    eps.push({n, title:titulos[n]||`Episodio ${n}`});
   }
   return eps;
 }
 
-const CATALOG = [
+// Formato embed Archive.org con start= para ir directo al archivo
+// https://archive.org/embed/IDENTIFIER?start=FILENAME
+const CATALOG=[
   {
-    id:'thundercats', title:'ThunderCats', years:'1985–1988', emoji:'⚡🐱',
+    id:'thundercats',title:'ThunderCats',years:'1985–1988',emoji:'⚡🐱',
     audio:'Español Latino + Inglés',
     desc:'Los felinos cósmicos huyen de Thundera y llegan a la Tercera Tierra. Lion-O y la Espada del Augurio enfrentan al eterno Mumm-Ra.',
     identifier:'thundercats-1985-latinoingles-1080p',
     episodes:[
-      {n:'001',title:'Éxodo (1)',                             file:'Thundercats 001 - Éxodo (1).mp4'},
-      {n:'002',title:'La alianza profana',                    file:'Thundercats 002 - La alianza profana (1).mp4'},
-      {n:'003',title:'La ayuda de los Berbils',               file:'Thundercats 003 - La ayuda de los Berbils (1).mp4'},
-      {n:'004',title:'Los esclavos del castillo Plun-Darr',   file:'Thundercats 004 - Los esclavos del castillo Plun-Darr (1).mp4'},
-      {n:'005',title:'Pumm-Ra',                               file:'Thundercats 005 - Pumm-Ra (1).mp4'},
-      {n:'006',title:'El terror de Brazo de Hierro',          file:'Thundercats 006 - El terror de Brazo de Hierro (1).mp4'},
-      {n:'007',title:'Cuestión de tiempo',                    file:'Thundercats 007 - Cuestión de tiempo (1).mp4'},
-      {n:'008',title:'El torreón de las trampas',             file:'Thundercats 008 - El torreón de las trampas (1).mp4'},
-      {n:'009',title:'El jardín de las delicias',             file:'Thundercats 009 - El jardín de las delicias (1).mp4'},
-      {n:'010',title:'Mandora - La combatiente del mal',      file:'Thundercats 010 - Mandora - La combatiente del mal (1).mp4'},
+      {n:'001',title:'Éxodo (1)'},
+      {n:'002',title:'La alianza profana'},
+      {n:'003',title:'La ayuda de los Berbils'},
+      {n:'004',title:'Los esclavos del castillo Plun-Darr'},
+      {n:'005',title:'Pumm-Ra'},
+      {n:'006',title:'El terror de Brazo de Hierro'},
+      {n:'007',title:'Cuestión de tiempo'},
+      {n:'008',title:'El torreón de las trampas'},
+      {n:'009',title:'El jardín de las delicias'},
+      {n:'010',title:'Mandora - La combatiente del mal'},
     ]
   },
   {
-    id:'heman', title:'He-Man y los Amos del Universo', years:'1983–1985', emoji:'⚔️💪',
+    id:'heman',title:'He-Man y los Amos del Universo',years:'1983–1985',emoji:'⚔️💪',
     audio:'Español Latino',
     desc:'El Príncipe Adam de Eternia se transforma en He-Man, el hombre más poderoso del universo, para defender Grayskull de Skeletor.',
     identifier:'He-Man-T1-BerserkLatam',
     episodes:[
-      {n:'001',title:'El rayo desaparecedor de diamante', file:'He-Man 001 El rayo desaparecedor de diamante.mp4'},
-      {n:'002',title:'El fantasma del castillo',          file:'He-Man 002 El fantasma del castillo.mp4'},
-      {n:'003',title:'Evilseed',                          file:'He-Man 003 Evilseed.mp4'},
-      {n:'004',title:'Teela la guerrera',                 file:'He-Man 004 Teela la guerrera.mp4'},
-      {n:'005',title:'La trampa de Skeletor',             file:'He-Man 005 La trampa de Skeletor.mp4'},
-      {n:'006',title:'El hechizo del dragón',             file:'He-Man 006 El hechizo del dragón.mp4'},
-      {n:'007',title:'El misterio de Eternia',            file:'He-Man 007 El misterio de Eternia.mp4'},
-      {n:'008',title:'El ladrón de poderes',              file:'He-Man 008 El ladrón de poderes.mp4'},
-      {n:'009',title:'El pozo de la eternidad',           file:'He-Man 009 El pozo de la eternidad.mp4'},
-      {n:'010',title:'El juego del destino',              file:'He-Man 010 El juego del destino.mp4'},
+      {n:'001',title:'El rayo desaparecedor de diamante'},
+      {n:'002',title:'El fantasma del castillo'},
+      {n:'003',title:'Evilseed'},
+      {n:'004',title:'Teela la guerrera'},
+      {n:'005',title:'La trampa de Skeletor'},
+      {n:'006',title:'El hechizo del dragón'},
+      {n:'007',title:'El misterio de Eternia'},
+      {n:'008',title:'El ladrón de poderes'},
+      {n:'009',title:'El pozo de la eternidad'},
+      {n:'010',title:'El juego del destino'},
     ]
   },
   {
-    id:'halcones', title:'Halcones Galácticos', years:'1986–1987', emoji:'🦅🚀',
+    id:'halcones',title:'Halcones Galácticos',years:'1986–1987',emoji:'🦅🚀',
     audio:'Español Latino',
     desc:'Guerreros mitad metal, mitad carne protegen la galaxia Limbo contra Mon*Star. ¡65 episodios completos en latino!',
     identifier:'los-halcones-galacticos-audio-latino',
-    episodes: halconesEps()
+    episodes:halconesEps()
   },
 ];
 
@@ -198,7 +191,7 @@ function renderEpisodes(){
   const sec=document.getElementById('episodes-section');
   if(!currentSeries){sec.innerHTML='<div class="empty">← Elige una serie del menú</div>';return;}
   sec.innerHTML=`
-    <div class="ep-label">▸ Episodios disponibles · ${currentSeries.episodes.length} total</div>
+    <div class="ep-label">▸ Episodios · ${currentSeries.episodes.length} total</div>
     <div class="episodes-grid">
       ${currentSeries.episodes.map(ep=>`
         <div class="ep-card ${currentEp?.n===ep.n?'playing':''}" onclick="playEpisode('${ep.n}')">
@@ -211,48 +204,41 @@ function renderEpisodes(){
 
 function playEpisode(epN){
   const ep=currentSeries.episodes.find(e=>e.n===epN);
-  if(!ep)return;
+  if(!ep) return;
   currentEp=ep;
+
   const zone=document.getElementById('player-zone');
   const loading=document.getElementById('loading');
   const ph=document.getElementById('placeholder');
-  if(ph)ph.remove();
+  if(ph) ph.remove();
   const old=zone.querySelector('iframe');
-  if(old)old.remove();
+  if(old) old.remove();
+
   loading.classList.add('show');
-  const src=`https://archive.org/embed/${currentSeries.identifier}/${encodeURIComponent(ep.file)}`;
+
+  // URL embed de Archive.org — formato playlist, sin especificar archivo individual
+  // Esto evita problemas con caracteres especiales en nombres de archivo
+  const src=`https://archive.org/embed/${currentSeries.identifier}?playlist=1&list_id=${currentSeries.identifier}`;
+
   const iframe=document.createElement('iframe');
   iframe.src=src;
   iframe.allowFullscreen=true;
   iframe.allow='autoplay; fullscreen';
-  iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups allow-presentation');
+  iframe.setAttribute('sandbox','allow-same-origin allow-scripts allow-forms allow-popups allow-presentation allow-autoplay');
   iframe.onload=()=>loading.classList.remove('show');
-  iframe.onerror=()=>{loading.classList.remove('show');showError();};
   zone.insertBefore(iframe,loading);
   renderEpisodes();
-}
 
-function showError(){
-  const zone=document.getElementById('player-zone');
-  const old=zone.querySelector('iframe');
-  if(old)old.remove();
-  zone.insertAdjacentHTML('afterbegin',`
-    <div class="player-placeholder" style="aspect-ratio:16/9">
-      <span style="font-size:2.5rem">⚠️</span>
-      <p style="color:#ff6060;font-size:.7rem">No se pudo cargar el episodio</p>
-      <a href="https://archive.org/details/${currentSeries.identifier}" target="_blank"
-         style="margin-top:8px;padding:7px 16px;border:1px solid rgba(255,96,96,.4);border-radius:3px;color:#ff9090;font-size:.72rem;text-decoration:none;">
-        Ver en Archive.org ↗
-      </a>
-    </div>`);
+  // Scroll al player
+  zone.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function showPlaceholder(){
   const zone=document.getElementById('player-zone');
   const old=zone.querySelector('iframe');
   const oldph=zone.querySelector('.player-placeholder');
-  if(old)old.remove();
-  if(oldph)oldph.remove();
+  if(old) old.remove();
+  if(oldph) oldph.remove();
   zone.insertAdjacentHTML('afterbegin',`
     <div class="player-placeholder" id="placeholder">
       <span class="big-emoji">${currentSeries?currentSeries.emoji:'📺'}</span>
